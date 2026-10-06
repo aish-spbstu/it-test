@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Какая IT-профессия подойдёт ребёнку</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column "тетрадь в клетку" card, one question per screen, progress as filled cells */
+:root{
+  --paper:#f3f6f4; --card:#ffffff; --grid:#dbe6e1; --ink:#14302a; --muted:#5a6f69;
+  --accent:#0e7a5f; --accent-ink:#ffffff; --mark:#ffd84d; --line:#c9d8d1; --soft:#e7f2ed;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0f1916; --card:#16241f; --grid:#1c2e28; --ink:#e6f1ec; --muted:#9db3ab;
+  --accent:#3fc59c; --accent-ink:#06231a; --mark:#e9c63a; --line:#2a3f38; --soft:#1d3029; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1916; --card:#16241f; --grid:#1c2e28; --ink:#e6f1ec; --muted:#9db3ab;
+  --accent:#3fc59c; --accent-ink:#06231a; --mark:#e9c63a; --line:#2a3f38; --soft:#1d3029; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;padding:28px 16px 40px;min-height:100%}
+.wrap{max-width:620px;margin:0 auto}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:28px 24px;box-shadow:0 6px 0 var(--line)}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(24px,6vw,34px);line-height:1.15}
+h2{font-size:clamp(19px,4.6vw,24px);line-height:1.25}
+.hl{background:linear-gradient(transparent 58%,var(--mark) 58%);padding:0 .1em}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.stack{display:flex;flex-direction:column;gap:16px}
+p{margin:0}
+.muted{color:var(--muted)}
+.btn{font:600 16px/1.2 var(--body);border:0;border-radius:12px;padding:15px 22px;cursor:pointer;background:var(--accent);color:var(--accent-ink);
+  text-align:center;text-decoration:none;display:inline-block;transition:transform .12s}
+.btn:hover{transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.btn:focus-visible,.opt:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+.btn[disabled]{opacity:.4;cursor:not-allowed;transform:none}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:13px;background:var(--soft);border-radius:999px;padding:5px 12px;color:var(--ink)}
+.cells{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:4px}
+.cell{height:8px;border-radius:2px;background:var(--grid)}
+.cell.on{background:var(--accent)}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.opts{display:grid;gap:10px}
+.opt{font:500 15.5px/1.35 var(--body);text-align:left;padding:14px 16px;border-radius:12px;border:1.5px solid var(--line);
+  background:var(--card);color:var(--ink);cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:border-color .12s,background .12s}
+.opt:hover{border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);background:var(--soft)}
+.opt .k{flex:none;width:26px;height:26px;border-radius:7px;border:1.5px solid var(--line);display:grid;place-items:center;
+  font:700 12px var(--display);color:var(--muted)}
+.opt.sel .k{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.nav{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.res-top{display:flex;gap:16px;align-items:center}
+.badge{flex:none;width:64px;height:64px;border-radius:16px;background:var(--mark);display:grid;place-items:center}
+.badge svg{width:36px;height:36px;stroke:#14302a;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:14px}
+.track{height:8px;background:var(--grid);border-radius:4px;overflow:hidden;margin-top:4px}
+.fill{height:100%;background:var(--accent);border-radius:4px}
+.pct{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.box{background:var(--soft);border-radius:12px;padding:16px;display:grid;gap:6px}
+.box b{font-weight:600}
+ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.foot{font-size:13px;color:var(--muted);text-align:center;margin-top:16px}
+.fade{animation:in .25s ease-out}
+@keyframes in{from{transform:translateY(6px)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}.btn{transition:none}}
+@media (max-width:440px){.card{padding:22px 16px}.nav .btn{flex:1}}
+
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grades .opt{justify-content:center;font:700 18px var(--display);padding:14px 0}
+.grades .opt.wide{grid-column:span 4;font:500 15px var(--body)}
+.prog{border:1.5px solid var(--accent);border-radius:14px;padding:18px;display:grid;gap:10px}
+.prog h3{font-family:var(--display);font-size:18px;line-height:1.3;margin:0;text-wrap:balance}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;font-size:14px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-weight:500}
+.alt{display:grid;gap:8px}
+.alt a{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none;font-size:15px}
+.alt a:hover{border-color:var(--accent)}
+.alt a span:last-child{color:var(--muted);white-space:nowrap;font-size:13px}
+.phone{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:14px}
+.phone b{font-variant-numeric:tabular-nums;user-select:all}
+.copy{font:600 13px var(--body);background:none;border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink);cursor:pointer}
+</style>
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="card" id="app"></div>
+  <p class="foot">Осенняя школа Академии информатики СПбПУ · 26–30 октября 2026 · 2–8 классы</p>
+</div>
+
+<script>
+const BASE="https://hse.spbstu.ru/schoolacademy/";
+/* Склонности → профессии */
+const P={
+  build:{name:"Инженер-конструктор",about:"Думает руками и в объёме: собирает, чертит, проектирует. Из таких детей вырастают инженеры, архитекторы и робототехники.",
+    icon:'<path d="M3 21h18M5 21V10l7-6 7 6v11"/><path d="M9 21v-6h6v6"/>'},
+  game:{name:"Геймдизайнер",about:"Придумывает правила, миры и персонажей. Ему интересно не просто играть, а понять, почему в игру хочется играть снова.",
+    icon:'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15 12h.01M18 13.5h.01"/>'},
+  design:{name:"Дизайнер и художник",about:"Замечает цвет, форму и композицию. Ему важно, чтобы созданное было красивым и понятным другим.",
+    icon:'<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="15.5" cy="10" r="1.2"/><path d="M12 21c-1.5-2 0-4 2-4h2a5 5 0 0 0 5-5"/>'},
+  code:{name:"Программист",about:"Любит, когда всё работает по правилам, которые он задал сам, и не сдаётся, пока не найдёт ошибку.",
+    icon:'<path d="M8 8l-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"/>'},
+  web:{name:"Веб-разработчик",about:"Хочет, чтобы его идеи увидели другие: ведёт блог, оформляет проекты, рассказывает о своих увлечениях.",
+    icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/>'},
+  ai:{name:"Специалист по искусственному интеллекту",about:"Ищет закономерности, любит задачи с точным ответом и спрашивает, как компьютер «понимает» картинки и речь.",
+    icon:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4M10 10h4v4h-4z"/>'}
+};
+/* Программы осенней школы — названия без изменений, классы по hse.spbstu.ru/schoolacademy/autumn-school/ */
+const PR=[
+ {n:"Проектируем вместе: первые чертежи",g:[2,4],u:"course/proektiruem-vmeste-pervye-chertezhi/3024/",w:{build:3,design:1},
+  d:"Учатся измерять, чертить и различать геометрические формы, конструируют простые объекты и делают творческий проект с эскизами и макетами."},
+ {n:"Дизайн настольных игр: первые шаги",g:[2,4],u:"course/dizajn-nastolnyx-igr-pervye-shagi/3059/",w:{game:3,design:2},
+  d:"Проходят путь от идеи до готовой игры: рисуют персонажей, карточки и коробку в векторном редакторе, а потом печатают и собирают свою настольную игру."},
+ {n:"Создай свой первый мультик",g:[3,5],u:"course/sozdaj-svoj-pervyj-multik/2866/",w:{design:3,game:1},
+  d:"Создают короткие анимации и разбираются, как устроены кадры, слои и эффекты."},
+ {n:"3D-Lego мир",g:[3,5],u:"course/3d---lego-mir/2871/",w:{build:3,game:1},
+  d:"Строят объёмные LEGO-конструкции в виртуальной среде и развивают пространственное мышление."},
+ {n:"Создай свой игровой мир",g:[4,6],u:"course/sozdaj-svoj-igrovoj-mir/2865/",w:{game:3,code:2,build:1},
+  d:"Делают свою онлайн-игру в Roblox Studio: придумывают механику, создают объекты и персонажей, программируют и тестируют."},
+ {n:"Создай свой сайт без кода",g:[5,7],u:"course/sozdaj-svoj-sajt-bez-koda/2864/",w:{web:3,design:2},
+  d:"Собирают сайт на конструкторе Tilda: от технического задания, палитры и эскиза страниц до публикации."},
+ {n:"Знакомство с искусственным интеллектом в Scratch",g:[5,7],u:"course/znakomstvo-s-iskusstvennym-intellektom-v-scratch/2868/",w:{ai:3,code:2},
+  d:"Знакомятся с машинным обучением: делают в Scratch игры и приложения, которые распознают и классифицируют данные."},
+ {n:"Разработка игр на JavaScript",g:[6,7],u:"course/razrabotka-igr-na-javascript/2941/",w:{code:3,game:2},
+  d:"От переменных и типов данных доходят до работы с canvas и событиями и пишут собственную игру."},
+ {n:"От эскиза к шедевру",g:[7,8],u:"course/ot-eskiza-k-shedevru/3058/",w:{design:3},
+  d:"Изучают композицию, цвет и технику акриловой живописи и пишут собственную картину на холсте. Курс без компьютеров."}
+];
+const Q=[
+ {q:"Чем ребёнок чаще всего занят в свободное время?",o:[
+  ["Собирает конструктор, мастерит из подручных материалов",["build"]],
+  ["Придумывает игры и правила для друзей",["game"]],
+  ["Рисует, лепит, придумывает персонажей",["design"]],
+  ["Играет в компьютерные игры и хочет сделать свою",["code","game"]],
+  ["Снимает видео, ведёт блог или канал",["web"]],
+  ["Решает головоломки и задаёт голосовому помощнику каверзные вопросы",["ai"]]]},
+ {q:"Какой подарок обрадует больше всего?",o:[
+  ["Большой набор LEGO",["build"]],
+  ["Новая настольная игра",["game"]],
+  ["Краски, холст или графический планшет",["design"]],
+  ["Робот, которого можно запрограммировать",["code","ai"]],
+  ["Свой сайт или блог с красивым адресом",["web"]]]},
+ {q:"Какие уроки ребёнку нравятся больше?",o:[
+  ["Технология, где нужно что-то сделать руками",["build"]],
+  ["ИЗО",["design"]],
+  ["Математика",["ai","code"]],
+  ["Информатика",["code","web"]],
+  ["Окружающий мир или литература, где можно придумывать истории",["game","web"]]]},
+ {q:"Какую роль он берёт в общем деле?",o:[
+  ["Строит и собирает",["build"]],
+  ["Придумывает правила и сюжет",["game"]],
+  ["Отвечает за то, как всё будет выглядеть",["design"]],
+  ["Разбирается с технической частью",["code"]],
+  ["Рассказывает всем, что получилось",["web"]],
+  ["Считает и проверяет, всё ли сходится",["ai"]]]},
+ {q:"Какой вопрос вы слышите от него чаще всего?",o:[
+  ["«Как это устроено внутри?»",["build"]],
+  ["«А давай поиграем по моим правилам?»",["game"]],
+  ["«Красиво получилось?»",["design"]],
+  ["«А можно сделать, чтобы оно работало само?»",["code"]],
+  ["«Как сделать свою страничку?»",["web"]],
+  ["«Как телефон узнаёт, что на фото кошка?»",["ai"]]]},
+ {q:"Что ребёнок делает, когда что-то не получается?",o:[
+  ["Разбирает и собирает заново",["build"]],
+  ["Ищет ошибку шаг за шагом",["code"]],
+  ["Переделывает, чтобы было аккуратнее",["design"]],
+  ["Пробует разные варианты и сравнивает",["ai"]],
+  ["Ищет подсказку в интернете или спрашивает друзей",["web"]],
+  ["Меняет правила, чтобы стало интереснее",["game"]]]},
+ {q:"Чем он хотел бы удивить друзей на каникулах?",o:[
+  ["Чертежом или макетом своего дома мечты",["build"]],
+  ["Своей настольной или компьютерной игрой",["game"]],
+  ["Мультфильмом или картиной",["design"]],
+  ["Программой, которую написал сам",["code"]],
+  ["Своим сайтом",["web"]],
+  ["Игрой, которая распознаёт жесты или рисунки",["ai"]]]}
+];
+const GR=[2,3,4,5,6,7,8];
+const TOTAL=Q.length+1;
+const S={step:-1,grade:null,ans:{}};
+const app=document.getElementById("app");
+const L="АБВГДЕ";
+const fits=(p,g)=>g>=p.g[0]&&g<=p.g[1];
+const cls=p=>`${p.g[0]}–${p.g[1]} класс`;
+
+function cells(cur){return `<div class="cells" style="--n:${TOTAL}" aria-hidden="true">${Array.from({length:TOTAL},(_,i)=>`<div class="cell${i<=cur?" on":""}"></div>`).join("")}</div>`}
+function go(n){S.step=n;render();window.scrollTo({top:0})}
+
+function render(){
+  if(S.step===-1) return intro();
+  if(S.step>=TOTAL) return result();
+  const head=`${cells(S.step)}<div class="meta"><span>Вопрос ${S.step+1} из ${TOTAL}</span><span>Осенняя школа · 26–30 октября</span></div>`;
+  if(S.step===0){
+    app.innerHTML=`<div class="stack fade">${head}
+      <h2>В каком классе учится ребёнок?</h2>
+      <p class="muted">Программы осенней школы рассчитаны на разные классы, поэтому подберём только те, что подходят по возрасту.</p>
+      <div class="grades" role="radiogroup">${GR.map(g=>`<button class="opt${S.grade===g?" sel":""}" role="radio" aria-checked="${S.grade===g}" id="g${g}" data-g="${g}">${g}</button>`).join("")}
+        <button class="opt wide${S.grade===9?" sel":""}" role="radio" aria-checked="${S.grade===9}" id="g9" data-g="9">9–11 класс</button></div>
+      <div class="nav"><button class="btn ghost" id="back">Назад</button><button class="btn" id="next" ${S.grade==null?"disabled":""}>Дальше</button></div></div>`;
+    app.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{S.grade=+b.dataset.g;render();setTimeout(()=>go(1),220)});
+  } else {
+    const q=Q[S.step-1],sel=S.ans[S.step-1];
+    app.innerHTML=`<div class="stack fade">${head}
+      <h2>${q.q}</h2>
+      <div class="opts" role="radiogroup">${q.o.map((o,i)=>`<button class="opt${sel===i?" sel":""}" role="radio" aria-checked="${sel===i}" data-i="${i}" id="o${S.step}_${i}"><span class="k">${L[i]}</span><span>${o[0]}</span></button>`).join("")}</div>
+      <div class="nav"><button class="btn ghost" id="back">Назад</button><button class="btn" id="next" ${sel==null?"disabled":""}>${S.step===TOTAL-1?"Узнать результат":"Дальше"}</button></div></div>`;
+    app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{S.ans[S.step-1]=+b.dataset.i;render();setTimeout(()=>go(S.step+1),220)});
+  }
+  document.getElementById("back").onclick=()=>go(S.step-1);
+  document.getElementById("next").onclick=()=>go(S.step+1);
+}
+
+function intro(){
+  app.innerHTML=`<div class="stack fade">
+    <span class="eyebrow">Тест для родителей</span>
+    <h1>Какая <span class="hl">IT-профессия</span> подойдёт вашему ребёнку?</h1>
+    <p class="muted">Ответьте на ${TOTAL} вопросов. Мы покажем, к чему у ребёнка больше склонности, и подберём программу осенней школы Политеха для его класса.</p>
+    <div class="facts"><span class="chip">${TOTAL} вопросов</span><span class="chip">2 минуты</span><span class="chip">для 2–8 классов</span></div>
+    <div><button class="btn" id="go">Начать тест</button></div></div>`;
+  document.getElementById("go").onclick=()=>go(0);
+}
+
+function phone(){return `<div class="phone"><span class="muted">Запись по телефону</span><b id="tel">+7 (812) 703-02-02</b><button class="copy" id="cp">Скопировать</button></div>`}
+function bindCopy(){const b=document.getElementById("cp");if(!b)return;b.onclick=()=>{
+  const t="+7 (812) 703-02-02";
+  try{navigator.clipboard.writeText(t).then(()=>{b.textContent="Скопировано"},sel)}catch(e){sel()}
+  function sel(){const r=document.createRange();r.selectNodeContents(document.getElementById("tel"));const s=getSelection();s.removeAllRanges();s.addRange(r)}
+}}
+
+function result(){
+  const sc={};Object.keys(P).forEach(k=>sc[k]=0);
+  Q.forEach((q,i)=>{const a=S.ans[i];if(a!=null)q.o[a][1].forEach(k=>sc[k]++)});
+  const sum=Object.values(sc).reduce((a,b)=>a+b,0)||1;
+  const rank=Object.keys(sc).sort((a,b)=>sc[b]-sc[a]);
+  const top=P[rank[0]];
+  const g=S.grade;
+  const bars=`<div class="stack" style="gap:10px"><b>Склонности ребёнка</b><div class="bars">${rank.map(k=>{const p=Math.round(sc[k]/sum*100);return `<div class="bar"><div style="min-width:0">${P[k].name}<div class="track"><div class="fill" style="width:${p}%"></div></div></div><span class="pct">${p}%</span></div>`}).join("")}</div></div>`;
+  const hdr=`<span class="eyebrow">Ваш результат</span>
+    <div class="res-top"><div class="badge"><svg viewBox="0 0 24 24">${top.icon}</svg></div><h1 style="font-size:clamp(21px,5.4vw,28px)">${top.name}</h1></div>
+    <p>${top.about}</p>`;
+  const again=`<button class="btn ghost" id="again">Пройти ещё раз</button>`;
+  let body;
+  if(g>=9){
+    body=`<div class="box"><b>Осенняя школа рассчитана на 2–8 классы</b><p>Для старшеклассников в Академии есть годовые курсы по программированию, веб-технологиям, сетям и дизайну, а также подготовка к ЕГЭ по информатике.</p></div>
+      ${bars}
+      <div class="nav"><a class="btn" href="${BASE}programs/" target="_blank" rel="noopener">Посмотреть курсы для 9–11 классов</a>${again}</div>`;
+  } else {
+    const avail=PR.filter(p=>fits(p,g)).map(p=>({p,s:Object.entries(p.w).reduce((a,[k,v])=>a+v*sc[k],0)})).sort((a,b)=>b.s-a.s);
+    const best=avail[0].p, rest=avail.slice(1).map(x=>x.p);
+    body=`<div class="prog">
+        <span class="eyebrow">Программа осенней школы для ${g} класса</span>
+        <h3>«${best.n}»</h3>
+        <p>${best.d}</p>
+        <dl class="kv"><dt>Классы</dt><dd>${cls(best)}</dd><dt>Даты</dt><dd>26–30 октября, 5 дней</dd><dt>Время</dt><dd>11:00–18:00, с обедом и прогулками</dd><dt>Формат</dt><dd>очно, кампус Политеха</dd><dt>Стоимость</dt><dd>27 500 ₽</dd></dl>
+        <a class="btn" href="${BASE+best.u}" target="_blank" rel="noopener">Подробнее и запись</a>
+        ${phone()}
+      </div>
+      ${rest.length?`<div class="stack" style="gap:10px"><b>Ещё подходят по классу</b><div class="alt">${rest.map(p=>`<a href="${BASE+p.u}" target="_blank" rel="noopener"><span>«${p.n}»</span><span>${cls(p)}</span></a>`).join("")}</div></div>`:""}
+      ${bars}
+      <div class="nav">${again}<a class="btn ghost" href="${BASE}autumn-school/" target="_blank" rel="noopener">Все программы осенней школы</a></div>`;
+  }
+  app.innerHTML=`<div class="stack fade">${hdr}${body}</div>`;
+  document.getElementById("again").onclick=()=>{S.grade=null;S.ans={};go(-1)};
+  bindCopy();
+}
+render();
+</script>
+
+</body>
+</html>
